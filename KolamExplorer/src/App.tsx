@@ -6,6 +6,7 @@ import Learn from './pages/Learn';
 import Gallery from './pages/Gallery';
 import Create from './pages/Create';
 import Analyse from './pages/Analyse';
+import Draw from './pages/Draw';
 import './index.css';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/create" element={<Create />} />
           <Route path="/analyse" element={<Analyse />} />
+          <Route path="/draw" element={<Draw />} />
         </Routes>
       </Layout>
     </Router>

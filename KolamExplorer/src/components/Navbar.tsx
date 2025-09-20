@@ -6,12 +6,14 @@ const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
 
+  // Added "/draw" to nav items
   const navItems = [
     { path: "/", label: "Home" },
     { path: "/learn", label: "Learn" },
     { path: "/gallery", label: "Gallery" },
     { path: "/create", label: "Create" },
     { path: "/analyse", label: "Analyse" },
+    { path: "/draw", label: "Draw" }, // <-- new item
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -21,13 +23,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="p-2 rounded-lg group-hover:shadow-lg transition-all duration-300">
-              <img
-                src="/images/logo.png"
-                alt="Kolam Explorer Logo"
-                className="h-6 w-6 object-contain"
-              />
-            </div>
+
             <span className="font-bold text-xl bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
               Kolam Explorer
             </span>
@@ -59,11 +55,7 @@ const Navbar: React.FC = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-md text-gray-700 hover:text-orange-500 hover:bg-orange-50 transition-colors duration-300"
             >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
