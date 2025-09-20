@@ -1,250 +1,160 @@
-import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState } from "react";
 
 // -------------------- DATA --------------------
-export const STATE_INFO = {
-  "Tamil Nadu": { /* ... same as before ... */ },
-  "Kerala": { /* ... */ },
-  "Karnataka": { /* ... */ },
-  "Andhra Pradesh": { /* ... */ },
-  "Telangana": { /* ... */ }
-};
+const STATES = [
+  "Tamil Nadu",
 
-export const SOUTH_INDIA_GALLERIES = {
-  "Tamil Nadu": ["/images/kolam1.jpg", "/images/kolam2.jpg", "/images/kolam3.jpg"],
-  "Kerala": ["/images/kolam4.jpg", "/images/kolam5.jpg"],
-  "Karnataka": ["/images/kolam6.jpg", "/images/kolam7.jpg"],
-  "Andhra Pradesh": ["/images/kolam8.jpg", "/images/kolam9.jpg"],
-  "Telangana": ["/images/kolam10.jpg", "/images/kolam11.jpg"]
-};
+  "Karnataka",
+  "Andhra Pradesh",
+  "Telangana",
+] as const;
 
-const SOUTH_STATES = new Set(Object.keys(STATE_INFO));
+export const STATE_INFO: Record<
+  (typeof STATES)[number],
+  { description: string; kolam: string; map: string }
+> = {
+  "Tamil Nadu": {
+    description: "Kolam is drawn daily at the entrance, symbolizing prosperity.",
+    kolam: "/images/kolam1.jpg",
+    map: "/images/tamilnadu.png",
+  },
+
+  Karnataka: {
+    description: "Muggulu and Rangoli are drawn in front of homes.",
+    kolam: "/images/kolam6.jpg",
+    map: "/images/karnataka.png",
+  },
+  "Andhra Pradesh": {
+    description: "Muggulu drawn with lime powder and rice flour.",
+    kolam: "/images/kolam8.jpg",
+    map: "/images/andhrapradesh.png",
+  },
+  Telangana: {
+    description: "Known for colorful Muggulu designs during Sankranti.",
+    kolam: "/images/kolam10.jpg",
+    map: "/images/telengana.png",
+  },
+};
 
 // -------------------- MAIN COMPONENT --------------------
 export default function KolamIndiaMap() {
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-  const [svgLoaded, setSvgLoaded] = useState(false);
-  const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [sidebarText, setSidebarText] = useState(
-    "Click on a state for info — South India opens a modal."
-  );
-  const [modalOpen, setModalOpen] = useState(false);
-  const [factIndex, setFactIndex] = useState(0);
+  const [index, setIndex] = useState(0);
+  const selectedState = STATES[index];
 
-  const facts = [
-    "Kolam uses rice flour to feed ants and birds — eco-friendly!",
-    "Some Kolam patterns hide mathematical beauty — symmetry & recursion.",
-    "Pookalam (Kerala) is made using fresh flowers during Onam.",
-    "Drawing kolam daily is considered an auspicious ritual in many homes."
-  ];
-
-  useEffect(() => {
-    const t = setInterval(() => setFactIndex((i) => (i + 1) % facts.length), 5000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    let cleanupListeners = () => {};
-
-    fetch("/in.svg", { signal })
-      .then((r) => r.text())
-      .then((svgText) => {
-        if (!svgContainerRef.current) return;
-
-        svgContainerRef.current.innerHTML = svgText;
-
-        // Make SVG scale properly
-        const svgEl = svgContainerRef.current.querySelector("svg");
-        if (svgEl) {
-          svgEl.setAttribute("width", "100%");
-          svgEl.setAttribute("height", "100%");
-          svgEl.setAttribute("preserveAspectRatio", "xMidYMid meet");
-        }
-
-        const paths = svgContainerRef.current.querySelectorAll("path, polygon, rect");
-        const eventListeners: any[] = [];
-
-        paths.forEach((p) => {
-          // Try to detect state from id or class
-          const attr = p.getAttribute("id") || p.getAttribute("class") || "";
-          const stateName = Object.keys(STATE_INFO).find((s) =>
-            attr.toLowerCase().includes(s.replace(/\s/g, "").toLowerCase())
-          );
-
-          const handleMouseEnter = () => {
-            (p as SVGElement).style.fill = "#ef4444";
-          };
-
-          const handleMouseLeave = () => {
-            (p as SVGElement).style.fill = stateName && SOUTH_STATES.has(stateName)
-              ? "#f59e0b"
-              : "#9ca3af";
-          };
-
-          const handleClick = () => {
-            if (!stateName) return;
-            if (SOUTH_STATES.has(stateName)) {
-              setSelectedState(stateName);
-              setModalOpen(true);
-            } else {
-              const info = STATE_INFO[stateName] || {};
-              setSidebarText(
-                `${stateName}: ${info.description || "Regional rangoli/kolam traditions."}`
-              );
-            }
-          };
-
-          (p as SVGElement).style.cursor = "pointer";
-          (p as SVGElement).style.fill = stateName && SOUTH_STATES.has(stateName)
-            ? "#f59e0b"
-            : "#9ca3af";
-
-          p.addEventListener("mouseenter", handleMouseEnter);
-          p.addEventListener("mouseleave", handleMouseLeave);
-          p.addEventListener("click", handleClick);
-
-          eventListeners.push({ p, type: "mouseenter", handler: handleMouseEnter });
-          eventListeners.push({ p, type: "mouseleave", handler: handleMouseLeave });
-          eventListeners.push({ p, type: "click", handler: handleClick });
-        });
-
-        setSvgLoaded(true);
-
-        cleanupListeners = () => {
-          eventListeners.forEach(({ p, type, handler }) => p.removeEventListener(type, handler));
-          if (svgContainerRef.current) svgContainerRef.current.innerHTML = "";
-        };
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          console.error("Failed to load SVG: ", err);
-          setSidebarText("Failed to load map SVG. Ensure /in.svg is in public/.");
-        }
-      });
-
-    return () => {
-      controller.abort();
-      cleanupListeners();
-    };
-  }, []);
+  const nextState = () => setIndex((i) => (i + 1) % STATES.length);
+  const prevState = () => setIndex((i) => (i - 1 + STATES.length) % STATES.length);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 p-4">
-      <div className="max-w-6xl mx-auto flex flex-col lg:flex-row gap-4">
-        {/* Sidebar */}
-        <aside className="w-full lg:w-1/3 bg-gray-50 p-4 rounded-lg shadow-sm">
-          <h2 className="text-2xl font-semibold mb-2">Origins & Significance</h2>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">🌾</div>
-              <div>
-                <div className="font-medium">Ancient practice</div>
-                <div className="text-xs text-gray-600">Passed down generations.</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">🪔</div>
-              <div>
-                <div className="font-medium">Prosperity & ritual</div>
-                <div className="text-xs text-gray-600">Linked to welcoming deities.</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">🎨</div>
-              <div>
-                <div className="font-medium">Math-art blend</div>
-                <div className="text-xs text-gray-600">Symmetry & recursion in patterns.</div>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="text-2xl">🌍</div>
-              <div>
-                <div className="font-medium">Eco-friendly</div>
-                <div className="text-xs text-gray-600">Made with rice flour/flowers.</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 p-3 bg-white rounded border">
-            <div className="text-sm font-medium">Selected:</div>
-            <div className="mt-2 text-sm text-gray-700 h-28 overflow-auto">
-              {selectedState ? (
-                <div>
-                  <div className="font-semibold">{selectedState}</div>
-                  <div className="text-xs text-gray-600">
-                    {STATE_INFO[selectedState]?.description || "Regional Kolam info."}
-                  </div>
-                </div>
-              ) : (
-                <div>{sidebarText}</div>
-              )}
-            </div>
-          </div>
-        </aside>
+    <div className="flex flex-col w-full h-full p-2 gap-4">
+      {/* Panels */}
+      <div className="flex flex-col md:flex-row gap-4 w-full h-full">
+        
+{/* Left panel */}
+<aside className="flex-shrink-0 md:w-1/3 bg-white/80 backdrop-blur-sm border border-amber-200 p-5 rounded-2xl shadow-lg flex flex-col">
+  <h2 className="text-2xl font-bold text-amber-800 mb-4">Origins & Significance</h2>
 
-        {/* Main map */}
-        <main className="w-full lg:w-2/3 bg-white p-2 rounded-lg shadow-sm relative">
-          <div className="p-2 border-b mb-2 flex items-center justify-between">
-            <div className="font-semibold">Interactive India Kolam Map</div>
-            <div className="text-sm text-gray-500">Hover a state — click to explore</div>
+  <div className="flex-1 overflow-auto space-y-5 text-sm pr-2">
+    {/* Early History */}
+    <div className="flex items-start gap-3">
+      <div className="text-2xl">🏺</div>
+      <div>
+        <div className="font-semibold text-amber-700">2nd Century BCE</div>
+        <div className="text-xs text-gray-700">
+          Sangam literature mentions <b>Kolam</b> as a sacred threshold art. 
+          Daily drawings at dawn symbolized <i>order, discipline, and cosmic rhythm</i>.
+        </div>
+      </div>
+    </div>
+
+    {/* Rituals */}
+    <div className="flex items-start gap-3">
+      <div className="text-2xl">🪔</div>
+      <div>
+        <div className="font-semibold text-amber-700">Medieval Temples</div>
+        <div className="text-xs text-gray-700">
+          Kolams were used in <b>temple courtyards</b> during rituals and festivals.  
+          They became offerings to deities, welcoming prosperity, fertility, and harmony. 
+        </div>
+      </div>
+    </div>
+
+    {/* Math + Art */}
+    <div className="flex items-start gap-3">
+      <div className="text-2xl">📐</div>
+      <div>
+        <div className="font-semibold text-amber-700">Cultural Mathematics</div>
+        <div className="text-xs text-gray-700">
+          Over centuries, designs evolved to include <b>geometry, symmetry, recursion, 
+          and fractals</b>. They represent a form of <i>oral mathematical knowledge</i>, 
+          passed down through women’s artistry.
+        </div>
+      </div>
+    </div>
+
+    {/* Eco & Social */}
+    <div className="flex items-start gap-3">
+      <div className="text-2xl">🌾</div>
+      <div>
+        <div className="font-semibold text-amber-700">Living Tradition</div>
+        <div className="text-xs text-gray-700">
+          Kolams are eco-friendly, drawn with <b>rice flour</b> to feed birds and ants.  
+          They reinforce <b>community bonds</b>, with neighbors exchanging designs and 
+          children learning by imitation.
+        </div>
+      </div>
+    </div>
+
+    {/* Modern Era */}
+
+  </div>
+</aside>
+
+
+        {/* Middle panel - Kolam */}
+        <section className="flex-shrink-0 md:w-1/3 bg-gray-50 p-4 rounded-lg shadow flex flex-col">
+          <h2 className="text-xl font-semibold mb-2">{selectedState} – Kolam</h2>
+          <div className="flex-1 flex flex-col gap-3 overflow-auto">
+            <div className="p-3 bg-white rounded border text-gray-600 text-sm">
+              {STATE_INFO[selectedState].description}
+            </div>
+            <div className="h-[250px] w-full border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+              <img
+                src={STATE_INFO[selectedState].kolam}
+                alt={`${selectedState} kolam`}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
           </div>
-          <div className="w-full h-[520px] flex items-center justify-center">
-            {!svgLoaded && <div className="text-gray-400">Loading map…</div>}
-            <div
-              ref={svgContainerRef}
-              className="w-full h-full"
-              style={{ display: svgLoaded ? "block" : "none" }}
+        </section>
+
+        {/* Right panel - Map */}
+        <section className="flex-1 bg-gray-50 p-4 rounded-lg shadow flex flex-col">
+          <h2 className="text-xl font-semibold mb-3">{selectedState} – Map</h2>
+          <div className="w-full flex items-center justify-center overflow-auto border rounded-lg bg-gray-50 p-2">
+            <img
+              src={STATE_INFO[selectedState].map}
+              alt={`${selectedState} map`}
+              className="w-full h-auto object-contain"
             />
           </div>
-
-
-        </main>
+        </section>
       </div>
 
-      {/* Modal */}
-      <AnimatePresence>
-        {modalOpen && selectedState && (
-          <KolamModal
-            stateName={selectedState}
-            onClose={() => setModalOpen(false)}
-            gallery={SOUTH_INDIA_GALLERIES[selectedState] || []}
-            info={STATE_INFO[selectedState] || {}}
-          />
-        )}
-      </AnimatePresence>
+      {/* Bottom navigation */}
+      <div className="flex justify-center gap-4 mt-2">
+        <button
+          onClick={prevState}
+          className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+        >
+          ⏮️ Previous
+        </button>
+        <button
+          onClick={nextState}
+          className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
+        >
+          Next ⏭️
+        </button>
+      </div>
     </div>
-  );
-}
-
-// -------------------- MODAL COMPONENT --------------------
-function KolamModal({ stateName, onClose, gallery, info }: any) {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % (gallery.length || 1)), 3000);
-    return () => clearInterval(t);
-  }, [gallery.length]);
-
-  return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-      <motion.div
-        className="relative z-10 w-11/12 md:w-3/4 lg:w-2/3 bg-white rounded-2xl shadow-xl overflow-hidden"
-        initial={{ y: 60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 40, opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-      >
-        {/* Modal content same as before */}
-      </motion.div>
-    </motion.div>
   );
 }

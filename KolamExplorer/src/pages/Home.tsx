@@ -51,24 +51,19 @@ const Home: React.FC = () => {
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-100 via-red-50 to-yellow-100 opacity-70"></div>
         <div className="relative max-w-7xl mx-auto">
-          <div className="text-center">
-            <div className={`transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
+          <div className="flex flex-col lg:flex-row items-center justify-between gap-10">
+            
+            {/* Left: Text Content */}
+            <div className={`transition-all duration-1000 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'} lg:w-1/2`}>
               <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-orange-600 via-red-600 to-yellow-600 bg-clip-text text-transparent leading-tight">
                 Kolam Explorer
               </h1>
-              <p className="text-xl md:text-2xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-700 mb-8 leading-relaxed">
                 Where Art Meets Mathematics
               </p>
-              <p className="text-lg text-gray-600 mb-12 max-w-2xl mx-auto">
-                Discover the ancient Indian tradition of Kolam patterns - intricate designs that blend cultural heritage with mathematical beauty
+              <p className="text-lg text-gray-600 mb-12">
+                Discover the ancient Indian tradition of Kolam patterns – intricate designs that blend cultural heritage with mathematical beauty.
               </p>
-            </div>
-            
-            <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
-              <AnimatedKolam />
-            </div>
-            
-            <div className={`transition-all duration-1000 delay-600 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}>
               <Link
                 to="/learn"
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold rounded-full hover:shadow-xl hover:scale-105 transition-all duration-300 group"
@@ -76,6 +71,11 @@ const Home: React.FC = () => {
                 Start Exploring
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
+            </div>
+
+            {/* Right: Animated Kolam */}
+            <div className={`transition-all duration-1000 delay-300 transform ${isVisible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'} lg:w-1/2`}>
+              <AnimatedKolam />
             </div>
           </div>
         </div>
@@ -117,6 +117,7 @@ const Home: React.FC = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-gray-50 to-orange-50">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Left Text Section */}
             <div>
               <div className="flex items-center mb-6">
                 <Star className="h-8 w-8 text-orange-500 mr-3" />
@@ -136,29 +137,15 @@ const Home: React.FC = () => {
                 <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </div>
-            
+
+            {/* Right Image Section */}
             <div className="relative">
-              <div className="relative p-8 bg-white rounded-2xl shadow-xl">
-                <div className="grid grid-cols-3 gap-4">
-                  {[...Array(9)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-4 h-4 bg-gradient-to-br from-orange-400 to-red-500 rounded-full animate-pulse"
-                      style={{ animationDelay: `${i * 200}ms` }}
-                    ></div>
-                  ))}
-                </div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <svg className="w-32 h-32" viewBox="0 0 100 100">
-                    <path
-                      d="M20 20 L80 20 L80 80 L20 80 Z M50 50 m -20 0 a 20 20 0 0 1 40 0 a 20 20 0 0 1 -40 0"
-                      fill="none"
-                      stroke="rgb(251 146 60)"
-                      strokeWidth="2"
-                      className="animate-pulse"
-                    />
-                  </svg>
-                </div>
+              <div className="relative p-4 bg-white rounded-2xl shadow-xl">
+                <img
+                  src="/images/kolam1.jpg"
+                  alt="Kolam design"
+                  className="w-full h-auto rounded-xl object-contain"
+                />
               </div>
             </div>
           </div>
