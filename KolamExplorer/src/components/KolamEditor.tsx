@@ -38,12 +38,8 @@ export const KolamEditor: React.FC = () => {
 
   const kolamRef = useRef<HTMLDivElement>(null);
 
-  // Update duration when speed changes
-  useEffect(() => {
-    setDuration(speedToDuration(speed));
-  }, [speed]);
+  useEffect(() => setDuration(speedToDuration(speed)), [speed]);
 
-  // Stop animation automatically when duration ends
   useEffect(() => {
     if (animating && pattern) {
       const timer = setTimeout(() => setAnimating(false), duration);
@@ -51,22 +47,18 @@ export const KolamEditor: React.FC = () => {
     }
   }, [animating, pattern, duration]);
 
-  // Function to generate static Kolam
   const generatePattern = useCallback(() => {
     try {
       const newPattern = KolamGenerator.generateKolam1D(size);
       setPattern(newPattern);
-      setAnimating(false); // always static initially
+      setAnimating(false);
     } catch (err) {
       alert(
-        `Error generating pattern: ${
-          err instanceof Error ? err.message : String(err)
-        }`
+        `Error generating pattern: ${err instanceof Error ? err.message : String(err)}`
       );
     }
   }, [size]);
 
-  // Regenerate static Kolam whenever grid size changes
   useEffect(() => {
     generatePattern();
   }, [size, generatePattern]);
@@ -78,34 +70,21 @@ export const KolamEditor: React.FC = () => {
   return (
     <div className="min-h-screen bg-amber-100 flex flex-col items-center p-6">
       <header className="text-center mb-6">
-        <h1 className="text-4xl font-bold text-amber-900">
-          Zen Kolam Generator
-        </h1>
+        <h1 className="text-4xl font-bold text-amber-900">Kolam Creator</h1>
         <p className="text-lg text-amber-800 mt-1">
           Beautiful traditional South Indian geometric patterns
         </p>
       </header>
 
-      <div className="bg-amber-900 p-6 rounded-2xl shadow-lg w-full max-w-4xl">
-        {/* Kolam Display */}
-        <div
-          ref={kolamRef}
-          className="bg-amber-800 p-4 rounded-lg mb-6 flex justify-center items-center min-h-[300px]"
-        >
-          {pattern ? (
-            <KolamDisplay
-              pattern={pattern}
-              animate={animating}
-              animationTiming={duration}
-            />
-          ) : (
-            <p className="text-amber-100">Generate your first kolam!</p>
-          )}
-        </div>
-
+      {/* Responsive Left-Right Layout */}
+      <div className="bg-amber-900 p-6 rounded-2xl shadow-lg w-full max-w-6xl flex flex-col md:flex-row gap-6"
+      style={{
+    maxHeight: "70vh", // limit height to 70% of viewport
+    overflowY: "auto", // scroll if content is too tall
+  }}>
+        
         {/* Controls */}
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-center">
-          {/* Grid Size */}
+        <div className="flex flex-col gap-6 w-full md:w-64">
           <div className="flex flex-col items-center">
             <label className="text-amber-100 mb-1">Grid Size</label>
             <input
@@ -114,14 +93,11 @@ export const KolamEditor: React.FC = () => {
               max={15}
               value={size}
               onChange={(e) => setSize(parseInt(e.target.value))}
-              className="w-40"
+              className="w-full"
             />
-            <span className="text-amber-100 mt-1">
-              {size}x{size}
-            </span>
+            <span className="text-amber-100 mt-1">{size}x{size}</span>
           </div>
 
-          {/* Animation Speed */}
           <div className="flex flex-col items-center">
             <label className="text-amber-100 mb-1">Animation Speed</label>
             <input
@@ -130,39 +106,55 @@ export const KolamEditor: React.FC = () => {
               max={10}
               value={speed}
               onChange={(e) => setSpeed(parseInt(e.target.value))}
-              className="w-40"
+              className="w-full"
             />
-            <span className="text-amber-100 mt-1">
-              {(duration / 1000).toFixed(1)}s
-            </span>
+            <span className="text-amber-100 mt-1">{(duration / 1000).toFixed(1)}s</span>
+          </div>
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={generatePattern}
+              className="px-4 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
+            >
+              Generate Kolam
+            </button>
+            {pattern && (
+              <>
+                <button
+                  onClick={() => setAnimating(!animating)}
+                  className="px-4 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
+                >
+                  {animating ? "⏹️ Pause Animation" : "▶️ Play Animation"}
+                </button>
+                <button
+                  onClick={handleDownload}
+                  className="px-4 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
+                >
+                  💾 Download PNG
+                </button>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Buttons */}
-        <div className="flex justify-center gap-4 mt-6">
-          <button
-            onClick={generatePattern}
-            className="px-6 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
-          >
-            Generate Kolam
-          </button>
-
-          {pattern && (
-            <>
-              <button
-                onClick={() => setAnimating(!animating)}
-                className="px-6 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
-              >
-                {animating ? "⏹️ Pause Animation" : "▶️ Play Animation"}
-              </button>
-
-              <button
-                onClick={handleDownload}
-                className="px-6 py-2 bg-amber-500 text-amber-900 rounded-lg font-semibold hover:bg-amber-400"
-              >
-                💾 Download PNG
-              </button>
-            </>
+        {/* Kolam Display */}
+        <div
+          ref={kolamRef}
+          className="bg-amber-800 p-4 rounded-lg flex justify-center items-center w-full md:flex-1"
+          style={{
+            aspectRatio: "1/1",
+    minHeight: "250px",
+          }}
+        >
+          {pattern ? (
+            <KolamDisplay
+              pattern={pattern}
+              animate={animating}
+              animationTiming={duration}
+              className="w-full h-full"
+            />
+          ) : (
+            <p className="text-amber-100">Generate your first kolam!</p>
           )}
         </div>
       </div>

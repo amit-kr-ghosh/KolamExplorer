@@ -19,10 +19,8 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
 }) => {
   const { dimensions, dots, curves } = pattern;
 
-  // Calculate path length for accurate stroke animation
-  const calculatePathLength = (curvePoints?: CurvePoint[]): number => {
+  const calculatePathLength = (curvePoints?: CurvePoint[]) => {
     if (!curvePoints || curvePoints.length < 2) return 100;
-
     let length = 0;
     for (let i = 1; i < curvePoints.length; i++) {
       const dx = curvePoints[i].x - curvePoints[i - 1].x;
@@ -32,13 +30,7 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
     return Math.max(length, 50);
   };
 
-  // Calculate line length for simple lines
-  const calculateLineLength = (
-    x1: number,
-    y1: number,
-    x2: number,
-    y2: number
-  ): number => {
+  const calculateLineLength = (x1: number, y1: number, x2: number, y2: number) => {
     const dx = x2 - x1;
     const dy = y2 - y1;
     return Math.sqrt(dx * dx + dy * dy);
@@ -47,17 +39,14 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
   return (
     <div className={`kolam-container ${className}`}>
       <svg
-        width={dimensions.width}
-        height={dimensions.height}
+        width="100%"
+        height="100%"
         viewBox={`0 0 ${dimensions.width} ${dimensions.height}`}
+        preserveAspectRatio="xMidYMid meet"
         className="kolam-svg"
-        style={
-          {
-            maxWidth: "100%",
-            height: "auto",
-            "--animation-duration": `${animationTiming}ms`,
-          } as React.CSSProperties
-        }
+        style={{
+          "--animation-duration": `${animationTiming}ms`,
+        } as React.CSSProperties}
       >
         {/* Render dots */}
         {dots.map((dot, index) => (
@@ -73,9 +62,7 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
             style={
               animate
                 ? {
-                    animationDelay: `${
-                      (index / dots.length) * animationTiming * 0.9
-                    }ms`,
+                    animationDelay: `${(index / dots.length) * animationTiming * 0.9}ms`,
                     animationDuration: `${animationTiming / dots.length}ms`,
                     opacity: 0,
                     animationPlayState:
@@ -88,17 +75,13 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
           />
         ))}
 
-        {/* Render curves using SVG paths with stroke animation */}
+        {/* Render curves */}
         {curves.map((curve, index) => {
-          // let curveDelay = animationTiming * (index / curves.length) * 0.25 // Delay based on curve index
-          const lineAnimTime = (animationTiming / curves.length) * 3; // Animation time for each curve
+          const lineAnimTime = (animationTiming / curves.length) * 3;
           const curveDelay = lineAnimTime * 0.33 * index;
 
           if (curve.curvePoints && curve.curvePoints.length > 1) {
-            // Calculate path length for proper animation
             const pathLength = calculatePathLength(curve.curvePoints);
-
-            // Render as smooth SVG path
             return (
               <path
                 key={curve.id}
@@ -130,7 +113,6 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
               />
             );
           } else {
-            // Handle simple lines (fallback)
             const lineLength = calculateLineLength(
               curve.start.x,
               curve.start.y,
@@ -160,11 +142,7 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
                           animationState === "paused" ? "paused" : "running",
                       }
                     : animationState === "stopped"
-                    ? {
-                        strokeDasharray: "none",
-                        strokeDashoffset: "0",
-                        opacity: 1,
-                      }
+                    ? { strokeDasharray: "none", strokeDashoffset: "0", opacity: 1 }
                     : { opacity: 0 }
                 }
               />
@@ -173,45 +151,14 @@ export const KolamDisplay: React.FC<KolamDisplayProps> = ({
         })}
       </svg>
 
-      {/* CSS for animations */}
       <style>{`
-        .kolam-dot-animated {
-          animation: fadeIn ease-in-out forwards;
-        }
-
-        .kolam-line-animated,
-        .kolam-path-animated {
-          animation: drawPath ease-in-out forwards;
-        }
-
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes drawPath {
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-
-        .kolam-svg {
-          filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
-        }
-
-        .kolam-path,
-        .kolam-line {
-          transition: stroke-width 0.2s ease;
-        }
-
-        .kolam-path:hover,
-        .kolam-line:hover {
-          stroke-width: 3;
-        }
+        .kolam-dot-animated { animation: fadeIn ease-in-out forwards; }
+        .kolam-line-animated, .kolam-path-animated { animation: drawPath ease-in-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes drawPath { to { stroke-dashoffset: 0; } }
+        .kolam-svg { filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1)); }
+        .kolam-path, .kolam-line { transition: stroke-width 0.2s ease; }
+        .kolam-path:hover, .kolam-line:hover { stroke-width: 3; }
       `}</style>
     </div>
   );
