@@ -309,7 +309,7 @@ export class KolamGenerator {
           M[i][hp + 1 + j] = Mat2[i][j];
         }
       }
-
+      
       // Mat(end,2:end) -> row vector from Mat
       for (let j = 1; j < hp + 2; j++) {
         M[hp][j - 1] = Mat[hp + 1][j];

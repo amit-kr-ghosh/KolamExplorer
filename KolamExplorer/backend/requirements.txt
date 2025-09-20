@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+torch
+torchvision
+pillow
+python-multipart
+
+
+python -m uvicorn server:app --reload

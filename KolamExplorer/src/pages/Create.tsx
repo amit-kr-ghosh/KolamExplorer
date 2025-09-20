@@ -84,7 +84,7 @@ export default function Create() {
             Because the rules allow variation, <b>each run produces a unique
             Kolam</b>, while still respecting mathematical continuity and
             symmetry.
-          </p>
+          </p>``
         </div>
       </section>
     </div>
